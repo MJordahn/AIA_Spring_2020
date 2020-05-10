@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
+from torchvision.transforms import RandomHorizontalFlip
 from skimage.transform import resize
 from albumentations import Rotate, RandomCrop, RandomBrightnessContrast, RandomBrightness, RandomContrast, RandomSizedCrop, RandomGamma, GaussNoise, Compose, Flip, HorizontalFlip
 from albumentations.pytorch import ToTensor
@@ -32,13 +33,13 @@ class RetinaDataset(Dataset):
         img_name = os.path.join(self.root_dir,
                                 self.image_list[idx])
 
-        image = cv2.imread(img_name)
+        image = {'image':cv2.imread(img_name, cv2.IMREAD_GRAYSCALE)}
 
-        image = {'image':cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)}
-        image = {'image':resize(image['image'], [768, 768], anti_aliasing=True)}
         #landmarks = self.landmarks_frame.iloc[idx, 1:]
         #landmarks = np.array([landmarks])
         #landmarks = landmarks.astype('float').reshape(-1, 2)
         if self.transforms:
             image = self.transforms(image = image['image'])
+        #image = {'image':resize(image['image'], [768, 768], anti_aliasing=True)}
+        #image = ToTensor()(image=image['image'])
         return torch.unsqueeze(image['image'], 0)
